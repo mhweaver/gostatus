@@ -6,7 +6,7 @@ import (
 
 type segmentUpdate struct {
 	output  string
-	segment segment
+	segment Segment
 }
 
 func main() {
@@ -17,14 +17,15 @@ func main() {
 	// segments/channels without segments needing to know about a shared channel.
 	updatedSegmentBuffer := make(chan segmentUpdate)
 	for _, segment := range segments {
-		go func() {
-			for output := range segment.getOutputBuffer() {
+		go func(segment Segment) {
+			for output := range segment.GetOutputBuffer() {
 				updatedSegmentBuffer <- segmentUpdate{output, segment}
 			}
-		}()
+		}(segment)
+		go segment.Run()
 	}
 
-	segmentOutputs := make(map[segment]string)
+	segmentOutputs := make(map[Segment]string)
 	for {
 		// Block until one of the segments updates
 		update := <-updatedSegmentBuffer
@@ -34,13 +35,8 @@ func main() {
 	}
 }
 
-func loadSegments() (segments []segment) {
-	segments = make([]segment, 0)
-	return
-}
-
 // Output each segment's output in the order each segment occurs in segments
-func printStatus(segments []segment, outputs map[segment]string) {
+func printStatus(segments []Segment, outputs map[Segment]string) {
 	for _, segment := range segments {
 		fmt.Print(outputs[segment])
 	}
