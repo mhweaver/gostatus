@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 type segmentUpdate struct {
@@ -37,8 +38,11 @@ func main() {
 
 // Output each segment's output in the order each segment occurs in segments
 func printStatus(segments []Segment, outputs map[Segment]string) {
+	orderedOutputs := make([]string, 0)
 	for _, segment := range segments {
-		fmt.Print(outputs[segment])
+		if outputs[segment] != "" {
+			orderedOutputs = append(orderedOutputs, outputs[segment])
+		}
 	}
-	fmt.Println()
+	fmt.Println(strings.Join(orderedOutputs, "    "))
 }
