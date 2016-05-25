@@ -4,6 +4,7 @@ import "time"
 import "strconv"
 
 type testSegment struct {
+	Segment
 	output chan string
 	count  int
 }

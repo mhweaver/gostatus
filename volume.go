@@ -1,6 +1,7 @@
 package main
 
 type volumeSegment struct {
+	Segment
 	output chan string
 }
 

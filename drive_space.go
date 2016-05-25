@@ -1,6 +1,7 @@
 package main
 
 type driveSpaceSegment struct {
+	Segment
 	output chan string
 }
 

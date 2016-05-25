@@ -1,6 +1,7 @@
 package main
 
 type memSegment struct {
+	Segment
 	output chan string
 }
 

@@ -5,6 +5,7 @@ import (
 )
 
 type timeSegment struct {
+	Segment
 	output chan string
 }
 

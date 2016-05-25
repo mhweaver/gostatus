@@ -1,6 +1,7 @@
 package main
 
 type tempSegment struct {
+	Segment
 	output chan string
 }
 

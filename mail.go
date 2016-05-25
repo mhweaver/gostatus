@@ -1,6 +1,7 @@
 package main
 
 type mailSegment struct {
+	Segment
 	output chan string
 }
 

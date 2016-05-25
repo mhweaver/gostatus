@@ -1,6 +1,7 @@
 package main
 
 type networkSegment struct {
+	Segment
 	output chan string
 }
 
