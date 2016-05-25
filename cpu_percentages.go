@@ -36,15 +36,15 @@ func (segment *cpuPercentSegment) Run() {
 func (segment *cpuPercentSegment) renderOutput(percentages []float64) (s string) {
 	percentageStrings := make([]string, len(percentages))
 	for i, percentage := range percentages {
-		percentageStrings[i] = strconv.FormatFloat(percentage, 'f', 0, 64) + "%%" // %% to escape the %
+		percentageStrings[i] = strconv.FormatFloat(percentage, 'f', 0, 64) + "%" // %% to escape the %
 	}
-	return "cpu: " + strings.Join(percentageStrings[:4], " ")
+	return " " + strings.Join(percentageStrings[:4], " ")
 }
 
 func getSample() (idle, total []uint64) {
 	stat, err := linuxproc.ReadStat("/proc/stat")
 	if err != nil {
-		log.Fatal("stat read failed")
+		log.Print("stat read failed")
 	}
 	total = make([]uint64, len(stat.CPUStats))
 	idle = make([]uint64, len(stat.CPUStats))
