@@ -28,5 +28,5 @@ func (s *timeSegment) Run() {
 
 func (s *timeSegment) buildOutput(t time.Time) string {
 	now := t.Format("03:04:05 PM")
-	return "%{U#66BA00}%{+o}%{F#66BA00}⌚ %{F-}" + now + "%{-o}%{U-}"
+	return "%{U#66BA00}%{+o}%{F#66BA00} %{F-}" + now + "%{-o}%{U-}"
 }
