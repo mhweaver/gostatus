@@ -26,9 +26,9 @@ func (segment *cpuPercentSegment) GetOutputBuffer() chan string {
 func (segment *cpuPercentSegment) Run() {
 	for {
 		// Based on http://stackoverflow.com/questions/11356330/getting-cpu-usage-with-golang/17783687#17783687
-		idle0, total0 := getSample()
+		idle0, total0 := segment.getSample()
 		time.Sleep(3 * time.Second)
-		idle1, total1 := getSample()
+		idle1, total1 := segment.getSample()
 		segment.output <- segment.renderOutput(getPercentages(idle0, total0, idle1, total1))
 	}
 }
@@ -41,7 +41,7 @@ func (segment *cpuPercentSegment) renderOutput(percentages []float64) (s string)
 	return " " + strings.Join(percentageStrings[:4], " ")
 }
 
-func getSample() (idle, total []uint64) {
+func (segment *cpuPercentSegment) getSample() (idle, total []uint64) {
 	stat, err := linuxproc.ReadStat("/proc/stat")
 	if err != nil {
 		log.Print("stat read failed")
