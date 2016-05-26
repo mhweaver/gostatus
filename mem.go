@@ -10,11 +10,13 @@ import (
 type memSegment struct {
 	Segment
 	output chan string
+	color  string
 }
 
-func newMemSegment() (segment *memSegment) {
+func newMemSegment(color string) (segment *memSegment) {
 	segment = new(memSegment)
 	segment.output = make(chan string)
+	segment.color = color
 	return
 }
 
@@ -43,7 +45,7 @@ func (segment *memSegment) renderOutput(free, used, total int64) string {
 		color = "#ffffff"
 	}
 
-	return " " + "%{F" + color + "}" +
+	return "%{F" + segment.color + "}%{F-} " + "%{F" + color + "}" +
 		strconv.FormatFloat(float64(used)/1024/1024, 'f', 2, 64) +
 		"GiB%{F-} / " + strconv.FormatFloat(float64(total)/1024/1024, 'f', 2, 64) +
 		"GiB (%{F" + color + "}" + strconv.FormatFloat(percentUsed, 'f', 2, 64) + "%%{F-})"
