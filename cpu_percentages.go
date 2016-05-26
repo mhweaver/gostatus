@@ -35,6 +35,10 @@ func (segment *cpuPercentSegment) Run() {
 	}
 }
 
+func (segment *cpuPercentSegment) GetColor() string {
+	return segment.color
+}
+
 func (segment *cpuPercentSegment) renderOutput(percentages []float64) (s string) {
 	percentageStrings := make([]string, len(percentages))
 	for i, percentage := range percentages {

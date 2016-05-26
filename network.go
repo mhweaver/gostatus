@@ -37,6 +37,10 @@ func (segment *networkSegment) Run() {
 	}
 }
 
+func (segment *networkSegment) GetColor() string {
+	return segment.color
+}
+
 func (segment *networkSegment) renderOutput(interval time.Duration, stats0, stats1 []linuxproc.NetworkStat) string {
 	if stats0 == nil {
 		return ""

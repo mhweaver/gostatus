@@ -31,6 +31,10 @@ func (segment *memSegment) Run() {
 	}
 }
 
+func (segment *memSegment) GetColor() string {
+	return segment.color
+}
+
 func (segment *memSegment) renderOutput(free, used, total int64) string {
 	percentUsed := 100 * float64(used) / float64(total)
 	var color string

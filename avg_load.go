@@ -39,6 +39,10 @@ func (segment *avgLoadSegment) Run() {
 	}
 }
 
+func (segment *avgLoadSegment) GetColor() string {
+	return segment.color
+}
+
 func (segment *avgLoadSegment) renderOutput(loadAvg *linuxproc.LoadAvg) string {
 	yellowThreshold := float64(segment.numCpu)
 	redThreshold := float64(segment.numCpu * 2)

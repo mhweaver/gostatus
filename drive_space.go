@@ -31,6 +31,10 @@ func (segment *driveSpaceSegment) Run() {
 	}
 }
 
+func (segment *driveSpaceSegment) GetColor() string {
+	return segment.color
+}
+
 func (segment *driveSpaceSegment) renderOutput() string {
 	disk, err := linuxproc.ReadDisk("/")
 	if err != nil {

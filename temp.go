@@ -3,11 +3,13 @@ package main
 type tempSegment struct {
 	Segment
 	output chan string
+	color  string
 }
 
-func newTempSegment() (segment *tempSegment) {
+func newTempSegment(color string) (segment *tempSegment) {
 	segment = new(tempSegment)
 	segment.output = make(chan string)
+	segment.color = color
 	return
 }
 
@@ -16,4 +18,8 @@ func (segment *tempSegment) GetOutputBuffer() chan string {
 }
 
 func (segment *tempSegment) Run() {
+}
+
+func (segment *tempSegment) GetColor() string {
+	return segment.color
 }

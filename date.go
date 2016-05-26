@@ -7,11 +7,13 @@ import (
 type dateSegment struct {
 	Segment
 	output chan string
+	color  string
 }
 
-func newDateSegment() (s *dateSegment) {
+func newDateSegment(color string) (s *dateSegment) {
 	s = new(dateSegment)
 	s.output = make(chan string)
+	s.color = color
 	return
 }
 
@@ -26,8 +28,12 @@ func (s *dateSegment) Run() {
 	}
 }
 
+func (s *dateSegment) GetColor() string {
+	return s.color
+}
+
 func (s *dateSegment) buildOutput(t time.Time) string {
 	dayOfWeek := t.Format("Mon")
 	date := t.Format("2006-01-02")
-	return "%{U#00BAB1}%{+o}%{F#00BAB1} %{F-}" + dayOfWeek + " " + date + "%{-o}%{U-}"
+	return "%{U" + s.color + "}%{+o}%{F" + s.color + "} %{F-}" + dayOfWeek + " " + date + "%{-o}%{U-}"
 }
