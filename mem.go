@@ -37,7 +37,7 @@ func (segment *memSegment) renderOutput(free, used, total int64) string {
 		color = "#ff0000"
 	case percentUsed > 90:
 		color = "#ffae00"
-	case percentUsed > 20:
+	case percentUsed > 80:
 		color = "#fff600"
 	default:
 		color = "#ffffff"

@@ -12,12 +12,14 @@ type avgLoadSegment struct {
 	Segment
 	output chan string
 	numCpu int
+	color  string
 }
 
-func newAvgLoadSegment() (segment *avgLoadSegment) {
+func newAvgLoadSegment(color string) (segment *avgLoadSegment) {
 	segment = new(avgLoadSegment)
 	segment.output = make(chan string)
 	segment.numCpu = runtime.NumCPU()
+	segment.color = color
 	return
 }
 
@@ -41,7 +43,7 @@ func (segment *avgLoadSegment) renderOutput(loadAvg *linuxproc.LoadAvg) string {
 	yellowThreshold := float64(segment.numCpu)
 	redThreshold := float64(segment.numCpu * 2)
 
-	return " " + renderSingleLoad(loadAvg.Last1Min, yellowThreshold, redThreshold) +
+	return "%{F" + segment.color + "}%{F-} " + renderSingleLoad(loadAvg.Last1Min, yellowThreshold, redThreshold) +
 		" " + renderSingleLoad(loadAvg.Last5Min, yellowThreshold, redThreshold) +
 		" " + renderSingleLoad(loadAvg.Last15Min, yellowThreshold, redThreshold)
 }
