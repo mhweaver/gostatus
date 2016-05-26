@@ -10,11 +10,13 @@ import (
 type driveSpaceSegment struct {
 	Segment
 	output chan string
+	color  string
 }
 
-func newDriveSpaceSegment() (segment *driveSpaceSegment) {
+func newDriveSpaceSegment(color string) (segment *driveSpaceSegment) {
 	segment = new(driveSpaceSegment)
 	segment.output = make(chan string)
+	segment.color = color
 	return
 }
 
@@ -41,6 +43,6 @@ func (segment *driveSpaceSegment) renderOutput() string {
 	freeGiB := bToGiB(freeSpace)
 	allSpace := float64(disk.All) // in bytes
 	allGiB := bToGiB(allSpace)
-	return " " + strconv.FormatFloat(freeGiB, 'f', 2, 64) + "GiB / " +
+	return "%{F" + segment.color + "}%{F-} " + strconv.FormatFloat(freeGiB, 'f', 2, 64) + "GiB / " +
 		strconv.FormatFloat(allGiB, 'f', 2, 64) + "GiB (free)"
 }
