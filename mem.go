@@ -24,12 +24,12 @@ func (segment *memSegment) GetOutputBuffer() chan string {
 
 func (segment *memSegment) Run() {
 	for {
-		segment.output <- renderOutput(getMemInfo())
+		segment.output <- segment.renderOutput(getMemInfo())
 		time.Sleep(5 * time.Second)
 	}
 }
 
-func renderOutput(free, used, total int64) string {
+func (segment *memSegment) renderOutput(free, used, total int64) string {
 	percentUsed := 100 * float64(used) / float64(total)
 	var color string
 	switch {
