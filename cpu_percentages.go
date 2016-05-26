@@ -11,11 +11,13 @@ import (
 type cpuPercentSegment struct {
 	Segment
 	output chan string
+	color  string
 }
 
-func newCpuPercentSegment() (segment *cpuPercentSegment) {
+func newCpuPercentSegment(color string) (segment *cpuPercentSegment) {
 	segment = new(cpuPercentSegment)
 	segment.output = make(chan string)
+	segment.color = color
 	return
 }
 
@@ -36,9 +38,20 @@ func (segment *cpuPercentSegment) Run() {
 func (segment *cpuPercentSegment) renderOutput(percentages []float64) (s string) {
 	percentageStrings := make([]string, len(percentages))
 	for i, percentage := range percentages {
-		percentageStrings[i] = strconv.FormatFloat(percentage, 'f', 0, 64) + "%" // %% to escape the %
+		var color string
+		switch {
+		case percentage >= 85:
+			color = "aa0000"
+		case percentage >= 50:
+			color = "#ee7600"
+		default:
+			color = "-"
+		}
+		percentageStrings[i] = "%{F" + color + "}" +
+			strconv.FormatFloat(percentage, 'f', 0, 64) +
+			"%{F-}" + "%"
 	}
-	return " " + strings.Join(percentageStrings[:4], " ")
+	return "%{F" + segment.color + "}%{F-} " + strings.Join(percentageStrings[:4], " ")
 }
 
 func (segment *cpuPercentSegment) getSample() (idle, total []uint64) {
