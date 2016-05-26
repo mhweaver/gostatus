@@ -11,18 +11,20 @@ type segmentUpdate struct {
 }
 
 func main() {
-	segments := loadSegments()
+	rightSegments := loadSegments()
+	leftSegments := []Segment{newStdinSegment("-")}
 
 	// Set up a channel to watch for updates. This makes it so we can block on
 	// a single channel to wait for updates from an arbitrary number of
 	// segments/channels without segments needing to know about a shared channel.
 	updatedSegmentBuffer := make(chan segmentUpdate)
-	for _, segment := range segments {
-		go func(segment Segment) {
-			for output := range segment.GetOutputBuffer() {
-				updatedSegmentBuffer <- segmentUpdate{output, segment}
-			}
-		}(segment)
+	addToUpdateBuffer := func(segment Segment) {
+		for output := range segment.GetOutputBuffer() {
+			updatedSegmentBuffer <- segmentUpdate{output, segment}
+		}
+	}
+	for _, segment := range append(rightSegments, leftSegments...) {
+		go addToUpdateBuffer(segment)
 		go segment.Run()
 	}
 
@@ -32,17 +34,28 @@ func main() {
 		update := <-updatedSegmentBuffer
 
 		segmentOutputs[update.segment] = update.output
-		printStatus(segments, segmentOutputs)
+		printStatus(leftSegments, rightSegments, segmentOutputs)
 	}
 }
 
 // Output each segment's output in the order each segment occurs in segments
-func printStatus(segments []Segment, outputs map[Segment]string) {
-	orderedOutputs := make([]string, 0)
-	for _, segment := range segments {
-		if outputs[segment] != "" {
-			orderedOutputs = append(orderedOutputs, outputs[segment])
+func printStatus(leftSegments, rightSegments []Segment, outputs map[Segment]string) {
+	buildOrderedOutputs := func(segments []Segment) []string {
+		orderedOutputs := make([]string, 0)
+		for _, segment := range segments {
+			if outputs[segment] != "" {
+				segmentOutput := "%{U" + segment.GetColor() + "}%{+o}" + outputs[segment] + "%{-o}%{U-}"
+				orderedOutputs = append(orderedOutputs, segmentOutput)
+			}
 		}
+		return orderedOutputs
 	}
-	fmt.Println(strings.Join(orderedOutputs, "    "))
+	orderedRightOutputs := buildOrderedOutputs(rightSegments)
+	orderedLeftOutputs := buildOrderedOutputs(leftSegments)
+
+	outputFromRightSegments := "%{r}" + strings.Join(orderedRightOutputs, "    ")
+	outputFromLeftSegments := "%{l}" + strings.Join(orderedLeftOutputs, "    ")
+
+	output := outputFromLeftSegments + outputFromRightSegments
+	fmt.Println("%{Sf}" + output + "%{Sl}" + output)
 }
