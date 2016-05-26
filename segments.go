@@ -5,7 +5,7 @@ func loadSegments() (segments []Segment) {
 		newMailSegment(),
 		newDriveSpaceSegment("#999999"),
 		newTempSegment(),
-		newNetworkSegment(),
+		newNetworkSegment("#008079"),
 		newCpuPercentSegment("#0073BA"),
 		newAvgLoadSegment("#0073BA"),
 		newMemSegment(),

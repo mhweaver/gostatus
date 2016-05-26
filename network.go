@@ -11,12 +11,14 @@ type networkSegment struct {
 	Segment
 	output     chan string
 	lastSample []linuxproc.NetworkStat
+	color      string
 }
 
-func newNetworkSegment() (segment *networkSegment) {
+func newNetworkSegment(color string) (segment *networkSegment) {
 	segment = new(networkSegment)
 	segment.output = make(chan string)
 	segment.lastSample = nil
+	segment.color = color
 	return
 }
 
@@ -58,8 +60,8 @@ func (segment *networkSegment) renderOutput(interval time.Duration, stats0, stat
 	}
 	rxSpeedBps := float64(currSample.RxBytes-lastSample.RxBytes) / float64(interval/time.Second)
 	txSpeedBps := float64(currSample.TxBytes-lastSample.TxBytes) / float64(interval/time.Second)
-	return "" + strconv.FormatFloat(rxSpeedBps/1024, 'f', 1, 64) + " KiB/s " +
-		"" + strconv.FormatFloat(txSpeedBps/1024, 'f', 1, 64) + " KiB/s"
+	return "%{F" + segment.color + "}%{F-}" + strconv.FormatFloat(rxSpeedBps/1024, 'f', 1, 64) + " KiB/s " +
+		"%{F" + segment.color + "}%{F-}" + strconv.FormatFloat(txSpeedBps/1024, 'f', 1, 64) + " KiB/s"
 
 }
 
