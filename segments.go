@@ -7,6 +7,7 @@ func loadSegments() (segments []Segment) {
 		newTempSegment(),
 		newNetworkSegment(),
 		newCpuPercentSegment(),
+		newAvgLoadSegment(),
 		newMemSegment(),
 		newVolumeSegment(),
 		newDateSegment(),
