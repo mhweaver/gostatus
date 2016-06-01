@@ -7,6 +7,7 @@ type testSegment struct {
 	Segment
 	output chan string
 	count  int
+	color  string
 }
 
 func newTestSegment() (segment *testSegment) {
@@ -26,4 +27,8 @@ func (segment *testSegment) Run() {
 		segment.count++
 		segment.output <- strconv.Itoa(segment.count)
 	}
+}
+
+func (segment *testSegment) GetColor() string {
+	return segment.color
 }
