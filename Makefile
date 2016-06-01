@@ -2,4 +2,9 @@ all:
 	go build
 
 run:	all
-	./statusbar | lemonbar -f "DejaVu Sans Mono for Powerline"
+	./gostatus | lemonbar -f "DejaVu Sans Mono for Powerline"
+
+gostatus:	all
+
+install:	gostatus
+	cp $< ${HOME}/bin
