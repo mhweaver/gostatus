@@ -53,8 +53,9 @@ func printStatus(leftSegments, rightSegments []Segment, outputs map[Segment]stri
 	orderedRightOutputs := buildOrderedOutputs(rightSegments)
 	orderedLeftOutputs := buildOrderedOutputs(leftSegments)
 
-	outputFromRightSegments := "%{r}" + strings.Join(orderedRightOutputs, "    ")
-	outputFromLeftSegments := "%{l}" + strings.Join(orderedLeftOutputs, "    ")
+	separator := "  "
+	outputFromRightSegments := "%{r}" + strings.Join(orderedRightOutputs, separator)
+	outputFromLeftSegments := "%{l}" + strings.Join(orderedLeftOutputs, separator)
 
 	output := outputFromLeftSegments + outputFromRightSegments
 	fmt.Println("%{Sf}" + output + "%{Sl}" + output)
