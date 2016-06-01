@@ -60,7 +60,7 @@ func renderSingleLoad(load, yellowThreshold, redThreshold float64) string {
 	case load >= yellowThreshold:
 		color = "#ffff00"
 	default:
-		color = "#00ff00"
+		color = "-"
 	}
 	return "%{F" + color + "}" + strconv.FormatFloat(load, 'f', 2, 64) + "%{F-}"
 }
