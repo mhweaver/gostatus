@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 type segmentUpdate struct {
@@ -23,10 +24,16 @@ func main() {
 			updatedSegmentBuffer <- segmentUpdate{output, segment}
 		}
 	}
-	for _, segment := range append(rightSegments, leftSegments...) {
-		go addToUpdateBuffer(segment)
-		go segment.Run()
-	}
+	segmentStartDelay := 1 * time.Second / time.Duration(len(leftSegments)+len(rightSegments))
+	go func() {
+		for i, segment := range append(rightSegments, leftSegments...) {
+			go addToUpdateBuffer(segment)
+			// Delay the segment slightly, to space the segments out a little,
+			// so they aren't fighting over the update buffer as much
+			time.Sleep(time.Duration(i) * segmentStartDelay)
+			go segment.Run()
+		}
+	}()
 
 	segmentOutputs := make(map[Segment]string)
 	for {

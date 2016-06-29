@@ -27,7 +27,7 @@ func (segment *networkSegment) GetOutputBuffer() chan string {
 }
 
 func (segment *networkSegment) Run() {
-	interval := 1 * time.Second
+	interval := 2 * time.Second
 	for {
 		stats := segment.getSample()
 
