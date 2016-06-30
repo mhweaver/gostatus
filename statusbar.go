@@ -12,8 +12,9 @@ type segmentUpdate struct {
 }
 
 func main() {
-	rightSegments := loadSegments()
-	leftSegments := []Segment{newStdinSegment("-")}
+	formatter := NewLemonbarFormatter()
+	rightSegments := loadSegments(formatter)
+	leftSegments := []Segment{newStdinSegment()}
 
 	// Set up a channel to watch for updates. This makes it so we can block on
 	// a single channel to wait for updates from an arbitrary number of
@@ -35,24 +36,28 @@ func main() {
 		}
 	}()
 
+	firstScreenFormatter := formatter.SetMonitor("f")
+	lastScreenFormatter := formatter.SetMonitor("l")
+	alignLeftFormatter := formatter.AlignLeft()
+	alignRightFormatter := formatter.AlignRight()
 	segmentOutputs := make(map[Segment]string)
 	for {
 		// Block until one of the segments updates
 		update := <-updatedSegmentBuffer
 
 		segmentOutputs[update.segment] = update.output
-		printStatus(leftSegments, rightSegments, segmentOutputs)
+		output := renderOutput(leftSegments, rightSegments, segmentOutputs, alignLeftFormatter, alignRightFormatter)
+		fmt.Println(firstScreenFormatter.Format(output) + lastScreenFormatter.Format(output))
 	}
 }
 
 // Output each segment's output in the order each segment occurs in segments
-func printStatus(leftSegments, rightSegments []Segment, outputs map[Segment]string) {
+func renderOutput(leftSegments, rightSegments []Segment, outputs map[Segment]string, leftFormatter, rightFormatter formatter) string {
 	buildOrderedOutputs := func(segments []Segment) []string {
 		orderedOutputs := make([]string, 0)
 		for _, segment := range segments {
 			if outputs[segment] != "" {
-				segmentOutput := "%{U" + segment.GetColor() + "}%{+o}" + outputs[segment] + "%{-o}%{U-}"
-				orderedOutputs = append(orderedOutputs, segmentOutput)
+				orderedOutputs = append(orderedOutputs, outputs[segment])
 			}
 		}
 		return orderedOutputs
@@ -61,9 +66,8 @@ func printStatus(leftSegments, rightSegments []Segment, outputs map[Segment]stri
 	orderedLeftOutputs := buildOrderedOutputs(leftSegments)
 
 	separator := "  "
-	outputFromRightSegments := "%{r}" + strings.Join(orderedRightOutputs, separator)
-	outputFromLeftSegments := "%{l}" + strings.Join(orderedLeftOutputs, separator)
+	outputFromLeftSegments := leftFormatter.Format(strings.Join(orderedLeftOutputs, separator))
+	outputFromRightSegments := rightFormatter.Format(strings.Join(orderedRightOutputs, separator))
 
-	output := outputFromLeftSegments + outputFromRightSegments
-	fmt.Println("%{Sf}" + output + "%{Sl}" + output)
+	return outputFromLeftSegments + outputFromRightSegments
 }

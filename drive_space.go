@@ -9,14 +9,14 @@ import (
 
 type driveSpaceSegment struct {
 	Segment
-	output chan string
-	color  string
+	output    chan string
+	formatter formatter
 }
 
-func newDriveSpaceSegment(color string) (segment *driveSpaceSegment) {
+func newDriveSpaceSegment(formatter formatter) (segment *driveSpaceSegment) {
 	segment = new(driveSpaceSegment)
 	segment.output = make(chan string)
-	segment.color = color
+	segment.formatter = formatter
 	return
 }
 
@@ -31,8 +31,8 @@ func (segment *driveSpaceSegment) Run() {
 	}
 }
 
-func (segment *driveSpaceSegment) GetColor() string {
-	return segment.color
+func bToGiB(bytes float64) float64 {
+	return bytes / 1024 / 1024 / 1024
 }
 
 func (segment *driveSpaceSegment) renderOutput() string {
@@ -40,13 +40,12 @@ func (segment *driveSpaceSegment) renderOutput() string {
 	if err != nil {
 		log.Println("Unable to get stats on /")
 	}
-	bToGiB := func(bytes float64) float64 {
-		return bytes / 1024 / 1024 / 1024
-	}
 	freeSpace := float64(disk.Free) // in bytes
 	freeGiB := bToGiB(freeSpace)
 	allSpace := float64(disk.All) // in bytes
 	allGiB := bToGiB(allSpace)
-	return "%{F" + segment.color + "}%{F-} " + strconv.FormatFloat(freeGiB, 'f', 2, 64) + "GiB / " +
+	output := strconv.FormatFloat(freeGiB, 'f', 2, 64) + "GiB / " +
 		strconv.FormatFloat(allGiB, 'f', 2, 64) + "GiB (free)"
+
+	return segment.formatter.Format(output)
 }

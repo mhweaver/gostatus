@@ -10,14 +10,21 @@ import (
 
 type cpuPercentSegment struct {
 	Segment
-	output chan string
-	color  string
+	output    chan string
+	formatter formatter
+	redFg     formatter
+	orangeFg  formatter
+	defaultFg formatter
 }
 
-func newCpuPercentSegment(color string) (segment *cpuPercentSegment) {
+func newCpuPercentSegment(formatter formatter) (segment *cpuPercentSegment) {
 	segment = new(cpuPercentSegment)
 	segment.output = make(chan string)
-	segment.color = color
+	segment.formatter = formatter
+	bare := formatter.Bare()
+	segment.redFg = bare.WrapFgColor("#aa0000")
+	segment.orangeFg = bare.WrapFgColor("#ee7600")
+	segment.defaultFg = bare.WrapFgColor(bare.GetDefaultColor())
 	return
 }
 
@@ -35,27 +42,21 @@ func (segment *cpuPercentSegment) Run() {
 	}
 }
 
-func (segment *cpuPercentSegment) GetColor() string {
-	return segment.color
-}
-
 func (segment *cpuPercentSegment) renderOutput(percentages []float64) (s string) {
 	percentageStrings := make([]string, len(percentages))
 	for i, percentage := range percentages {
-		var color string
+		var percentageFormatter formatter
 		switch {
 		case percentage >= 85:
-			color = "aa0000"
+			percentageFormatter = segment.redFg
 		case percentage >= 50:
-			color = "#ee7600"
+			percentageFormatter = segment.orangeFg
 		default:
-			color = "-"
+			percentageFormatter = segment.defaultFg
 		}
-		percentageStrings[i] = "%{F" + color + "}" +
-			strconv.FormatFloat(percentage, 'f', 0, 64) +
-			"%{F-}" + "%"
+		percentageStrings[i] = percentageFormatter.Format(strconv.FormatFloat(percentage, 'f', 0, 64)) + "%"
 	}
-	return "%{F" + segment.color + "}%{F-} " + strings.Join(percentageStrings[:4], " ")
+	return segment.formatter.Format(strings.Join(percentageStrings[:4], " "))
 }
 
 func (segment *cpuPercentSegment) getSample() (idle, total []uint64) {

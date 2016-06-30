@@ -9,14 +9,12 @@ import (
 type stdinSegment struct {
 	Segment
 	output chan string
-	color  string
 	reader *bufio.Reader
 }
 
-func newStdinSegment(color string) (segment *stdinSegment) {
+func newStdinSegment() (segment *stdinSegment) {
 	segment = new(stdinSegment)
 	segment.output = make(chan string)
-	segment.color = color
 	segment.reader = bufio.NewReader(os.Stdin)
 	return
 }
@@ -34,8 +32,4 @@ func (segment *stdinSegment) Run() {
 
 		segment.output <- string(line[:])
 	}
-}
-
-func (segment *stdinSegment) GetColor() string {
-	return segment.color
 }

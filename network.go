@@ -11,14 +11,16 @@ type networkSegment struct {
 	Segment
 	output     chan string
 	lastSample []linuxproc.NetworkStat
-	color      string
+	formatter  formatter
+	whiteFg    formatter
 }
 
-func newNetworkSegment(color string) (segment *networkSegment) {
+func newNetworkSegment(formatter formatter) (segment *networkSegment) {
 	segment = new(networkSegment)
 	segment.output = make(chan string)
 	segment.lastSample = nil
-	segment.color = color
+	segment.formatter = formatter
+	segment.whiteFg = formatter.Bare().WrapFgColor("#FFFFFF")
 	return
 }
 
@@ -35,10 +37,6 @@ func (segment *networkSegment) Run() {
 		segment.lastSample = stats
 		time.Sleep(interval)
 	}
-}
-
-func (segment *networkSegment) GetColor() string {
-	return segment.color
 }
 
 func (segment *networkSegment) renderOutput(interval time.Duration, stats0, stats1 []linuxproc.NetworkStat) string {
@@ -64,8 +62,10 @@ func (segment *networkSegment) renderOutput(interval time.Duration, stats0, stat
 	}
 	rxSpeedBps := float64(currSample.RxBytes-lastSample.RxBytes) / float64(interval/time.Second)
 	txSpeedBps := float64(currSample.TxBytes-lastSample.TxBytes) / float64(interval/time.Second)
-	return "%{F" + segment.color + "}%{F-}" + strconv.FormatFloat(rxSpeedBps/1024, 'f', 1, 64) + " KiB/s " +
-		"%{F" + segment.color + "}%{F-}" + strconv.FormatFloat(txSpeedBps/1024, 'f', 1, 64) + " KiB/s"
+	icon := segment.whiteFg.Format("")
+	output := icon + strconv.FormatFloat(rxSpeedBps/1024, 'f', 1, 64) + " KiB/s " +
+		icon + strconv.FormatFloat(txSpeedBps/1024, 'f', 1, 64) + " KiB/s"
+	return segment.formatter.Format(output)
 
 }
 

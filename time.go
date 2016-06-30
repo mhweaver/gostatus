@@ -6,14 +6,14 @@ import (
 
 type timeSegment struct {
 	Segment
-	output chan string
-	color  string
+	output    chan string
+	formatter formatter
 }
 
-func newTimeSegment(color string) (s *timeSegment) {
+func newTimeSegment(formatter formatter) (s *timeSegment) {
 	s = new(timeSegment)
 	s.output = make(chan string)
-	s.color = color
+	s.formatter = formatter
 	return
 }
 
@@ -28,11 +28,7 @@ func (s *timeSegment) Run() {
 	}
 }
 
-func (s *timeSegment) GetColor() string {
-	return s.color
-}
-
 func (s *timeSegment) buildOutput(t time.Time) string {
 	now := t.Format("03:04:05 PM")
-	return "%{U" + s.color + "}%{+o}%{F" + s.color + "} %{F-}" + now + "%{-o}%{U-}"
+	return s.formatter.Format(now)
 }

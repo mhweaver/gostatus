@@ -6,14 +6,14 @@ import (
 
 type dateSegment struct {
 	Segment
-	output chan string
-	color  string
+	output    chan string
+	formatter formatter
 }
 
-func newDateSegment(color string) (s *dateSegment) {
+func newDateSegment(formatter formatter) (s *dateSegment) {
 	s = new(dateSegment)
 	s.output = make(chan string)
-	s.color = color
+	s.formatter = formatter
 	return
 }
 
@@ -28,12 +28,8 @@ func (s *dateSegment) Run() {
 	}
 }
 
-func (s *dateSegment) GetColor() string {
-	return s.color
-}
-
 func (s *dateSegment) buildOutput(t time.Time) string {
 	dayOfWeek := t.Format("Mon")
 	date := t.Format("2006-01-02")
-	return "%{U" + s.color + "}%{+o}%{F" + s.color + "} %{F-}" + dayOfWeek + " " + date + "%{-o}%{U-}"
+	return s.formatter.Format(dayOfWeek + " " + date)
 }

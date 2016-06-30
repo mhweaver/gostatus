@@ -9,14 +9,23 @@ import (
 
 type memSegment struct {
 	Segment
-	output chan string
-	color  string
+	output                chan string
+	formatter             formatter
+	lowUsageFormatter     formatter
+	highUsageFormatter    formatter
+	higherUsageFormatter  formatter
+	highestUsageFormatter formatter
 }
 
-func newMemSegment(color string) (segment *memSegment) {
+func newMemSegment(formatter formatter) (segment *memSegment) {
 	segment = new(memSegment)
 	segment.output = make(chan string)
-	segment.color = color
+	segment.formatter = formatter
+	bare := formatter.Bare()
+	segment.lowUsageFormatter = bare.WrapFgColor(bare.GetDefaultColor())
+	segment.highUsageFormatter = bare.WrapFgColor("#ff0000")
+	segment.higherUsageFormatter = bare.WrapFgColor("#ffae00")
+	segment.highestUsageFormatter = bare.WrapFgColor("#fff600")
 	return
 }
 
@@ -26,33 +35,28 @@ func (segment *memSegment) GetOutputBuffer() chan string {
 
 func (segment *memSegment) Run() {
 	for {
-		segment.output <- segment.renderOutput(getMemInfo())
+		segment.output <- segment.formatter.Format(segment.renderOutput(getMemInfo()))
 		time.Sleep(5 * time.Second)
 	}
 }
 
-func (segment *memSegment) GetColor() string {
-	return segment.color
-}
-
 func (segment *memSegment) renderOutput(free, used, total int64) string {
 	percentUsed := 100 * float64(used) / float64(total)
-	var color string
+	var usageFormatter formatter
 	switch {
 	case percentUsed > 95:
-		color = "#ff0000"
+		usageFormatter = segment.highestUsageFormatter
 	case percentUsed > 90:
-		color = "#ffae00"
+		usageFormatter = segment.higherUsageFormatter
 	case percentUsed > 80:
-		color = "#fff600"
+		usageFormatter = segment.highUsageFormatter
 	default:
-		color = "#ffffff"
+		usageFormatter = segment.lowUsageFormatter
 	}
 
-	return "%{F" + segment.color + "}%{F-} " + "%{F" + color + "}" +
-		strconv.FormatFloat(float64(used)/1024/1024, 'f', 2, 64) +
-		"GiB%{F-} / " + strconv.FormatFloat(float64(total)/1024/1024, 'f', 2, 64) +
-		"GiB (%{F" + color + "}" + strconv.FormatFloat(percentUsed, 'f', 2, 64) + "%%{F-})"
+	return usageFormatter.Format(strconv.FormatFloat(float64(used)/1024/1024, 'f', 2, 64)+"GiB") +
+		"/ " + strconv.FormatFloat(float64(total)/1024/1024, 'f', 2, 64) +
+		"GiB (" + usageFormatter.Format(strconv.FormatFloat(percentUsed, 'f', 2, 64)+"%") + ")"
 }
 
 func getMemInfo() (free, used, total int64) {

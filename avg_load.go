@@ -10,16 +10,23 @@ import (
 
 type avgLoadSegment struct {
 	Segment
-	output chan string
-	numCpu int
-	color  string
+	output           chan string
+	numCpu           int
+	formatter        formatter
+	redFormatter     formatter
+	yellowFormatter  formatter
+	defaultFormatter formatter
 }
 
-func newAvgLoadSegment(color string) (segment *avgLoadSegment) {
+func newAvgLoadSegment(formatter formatter) (segment *avgLoadSegment) {
 	segment = new(avgLoadSegment)
 	segment.output = make(chan string)
 	segment.numCpu = runtime.NumCPU()
-	segment.color = color
+	segment.formatter = formatter
+	bare := formatter.Bare()
+	segment.redFormatter = bare.WrapFgColor("#ff0000")
+	segment.yellowFormatter = bare.WrapFgColor("#ffff00")
+	segment.defaultFormatter = bare.WrapFgColor(bare.GetDefaultColor())
 	return
 }
 
@@ -34,33 +41,29 @@ func (segment *avgLoadSegment) Run() {
 			log.Fatal("unable to read /proc/loadavg")
 		}
 
-		segment.output <- segment.renderOutput(loadAvg)
+		segment.output <- segment.formatter.Format(segment.renderOutput(loadAvg))
 		time.Sleep(1 * time.Second)
 	}
-}
-
-func (segment *avgLoadSegment) GetColor() string {
-	return segment.color
 }
 
 func (segment *avgLoadSegment) renderOutput(loadAvg *linuxproc.LoadAvg) string {
 	yellowThreshold := float64(segment.numCpu)
 	redThreshold := float64(segment.numCpu * 2)
 
-	return "%{F" + segment.color + "}%{F-} " + renderSingleLoad(loadAvg.Last1Min, yellowThreshold, redThreshold) +
-		" " + renderSingleLoad(loadAvg.Last5Min, yellowThreshold, redThreshold) +
-		" " + renderSingleLoad(loadAvg.Last15Min, yellowThreshold, redThreshold)
+	return segment.renderSingleLoad(loadAvg.Last1Min, yellowThreshold, redThreshold) +
+		" " + segment.renderSingleLoad(loadAvg.Last5Min, yellowThreshold, redThreshold) +
+		" " + segment.renderSingleLoad(loadAvg.Last15Min, yellowThreshold, redThreshold)
 }
 
-func renderSingleLoad(load, yellowThreshold, redThreshold float64) string {
-	var color string
+func (segment *avgLoadSegment) renderSingleLoad(load, yellowThreshold, redThreshold float64) string {
+	var thresholdFormatter formatter
 	switch {
 	case load >= redThreshold:
-		color = "#ff0000"
+		thresholdFormatter = segment.redFormatter
 	case load >= yellowThreshold:
-		color = "#ffff00"
+		thresholdFormatter = segment.yellowFormatter
 	default:
-		color = "-"
+		thresholdFormatter = segment.defaultFormatter
 	}
-	return "%{F" + color + "}" + strconv.FormatFloat(load, 'f', 2, 64) + "%{F-}"
+	return thresholdFormatter.Format(strconv.FormatFloat(load, 'f', 2, 64))
 }
