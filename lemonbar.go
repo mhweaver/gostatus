@@ -1,7 +1,6 @@
 package main
 
 type lemonbarFormatter struct {
-	formatter
 	before, after string
 }
 

@@ -20,7 +20,7 @@ func newNetworkSegment(formatter formatter) (segment *networkSegment) {
 	segment.output = make(chan string)
 	segment.lastSample = nil
 	segment.formatter = formatter
-	segment.whiteFg = formatter.Bare().WrapFgColor("#FFFFFF")
+	segment.whiteFg = formatter.Bare().WrapFgColor(formatter.GetDefaultColor())
 	return
 }
 
@@ -62,9 +62,10 @@ func (segment *networkSegment) renderOutput(interval time.Duration, stats0, stat
 	}
 	rxSpeedBps := float64(currSample.RxBytes-lastSample.RxBytes) / float64(interval/time.Second)
 	txSpeedBps := float64(currSample.TxBytes-lastSample.TxBytes) / float64(interval/time.Second)
-	icon := segment.whiteFg.Format("")
-	output := icon + strconv.FormatFloat(rxSpeedBps/1024, 'f', 1, 64) + " KiB/s " +
-		icon + strconv.FormatFloat(txSpeedBps/1024, 'f', 1, 64) + " KiB/s"
+	rxIcon := segment.whiteFg.Format("")
+	txIcon := segment.whiteFg.Format("")
+	output := rxIcon + strconv.FormatFloat(rxSpeedBps/1024, 'f', 1, 64) + " KiB/s " +
+		txIcon + strconv.FormatFloat(txSpeedBps/1024, 'f', 1, 64) + " KiB/s"
 	return segment.formatter.Format(output)
 
 }

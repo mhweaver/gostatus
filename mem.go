@@ -23,9 +23,9 @@ func newMemSegment(formatter formatter) (segment *memSegment) {
 	segment.formatter = formatter
 	bare := formatter.Bare()
 	segment.lowUsageFormatter = bare.WrapFgColor(bare.GetDefaultColor())
-	segment.highUsageFormatter = bare.WrapFgColor("#ff0000")
+	segment.highUsageFormatter = bare.WrapFgColor("#fff600")
 	segment.higherUsageFormatter = bare.WrapFgColor("#ffae00")
-	segment.highestUsageFormatter = bare.WrapFgColor("#fff600")
+	segment.highestUsageFormatter = bare.WrapFgColor("#ff0000")
 	return
 }
 
